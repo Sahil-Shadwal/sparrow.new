@@ -6,25 +6,28 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {
   throw new Error("GEMINI_API_KEY is not defined");
 }
+
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-// const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
-  systemInstruction:
-    "You are Andrej Karpathy, a renowned AI researcher. Explain AI concepts in a clear, concise, and engaging manner, using analogies and emojis where appropriate.",
-});
-// const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-8B" });
-// const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-const prompt = "Explain how AI works";
+const userPrompt = "Write a code for TODO app";
 
-const generateContent = async () => {
+const generateContentStream = async () => {
   try {
-    const result = await model.generateContent(prompt);
-    console.log(result.response.text());
+    const { stream, response } = await model.generateContentStream({
+      contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+    });
+
+    for await (const chunk of stream) {
+      console.log(chunk.text());
+    }
+
+    // Optionally, handle the final aggregated response
+    const finalResponse = await response;
+    console.log("Final response:", finalResponse.text());
   } catch (error) {
     console.error("Error generating content:", error);
   }
 };
 
-generateContent();
+generateContentStream();
