@@ -7,7 +7,12 @@ if (!GEMINI_API_KEY) {
   throw new Error("GEMINI_API_KEY is not defined");
 }
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+// const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({
+  model: "gemini-1.5-flash",
+  systemInstruction:
+    "You are Andrej Karpathy, a renowned AI researcher. Explain AI concepts in a clear, concise, and engaging manner, using analogies and emojis where appropriate.",
+});
 // const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-8B" });
 // const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
