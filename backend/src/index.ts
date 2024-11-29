@@ -19,10 +19,14 @@ app.use(express.json());
 
 app.post("/template", async (req, res) => {
   const prompt = req.body.prompt;
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    systemInstruction: getSystemPrompt(),
+  });
 
   try {
-    const result = await model.generateContent({
+    // First determine if it's node or react
+    const typeResult = await model.generateContent({
       contents: [
         {
           role: "user",
@@ -37,9 +41,37 @@ app.post("/template", async (req, res) => {
       ],
     });
 
-    const answer = result.response.text().trim().toLowerCase();
+    const answer = typeResult.response.text().trim().toLowerCase();
+
+    if (answer === "node") {
+      // Generate the actual project template
+      const templateResult = await model.generateContent({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                text: `${getSystemPrompt()}\n\nCreate a complete Node.js project template for the following request:\n${prompt}\n\nInclude proper project structure, necessary files, and implementation details.`,
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          maxOutputTokens: 8000,
+        },
+      });
+
+      const response = templateResult.response.text();
+
+      res.json({
+        prompts: [response],
+        uiPrompts: [response],
+      });
+      return;
+    }
 
     if (answer === "react") {
+      // For React projects, use the existing template structure
       res.json({
         prompts: [
           BASE_PROMPT,
@@ -50,33 +82,30 @@ app.post("/template", async (req, res) => {
       return;
     }
 
-    if (answer === "node") {
-      res.json({
-        prompts: [
-          `Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${nodeBasePrompt}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n`,
-        ],
-        uiPrompts: [nodeBasePrompt],
-      });
-      return;
-    }
-
     res.status(403).json({ message: "You cant access this" });
   } catch (error) {
+    console.error("Template generation error:", error);
     res.status(500).json({ message: "Error processing request" });
   }
 });
 
 app.post("/chat", async (req, res) => {
   const messages = req.body.messages;
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    systemInstruction: getSystemPrompt(),
+  });
 
   try {
     const result = await model.generateContent({
       contents: [
-        {
-          role: "user",
-          parts: [{ text: messages[messages.length - 1].content }],
-        },
+        // Include system prompt as first message
+        { role: "user", parts: [{ text: getSystemPrompt() }] },
+        // Include full conversation history
+        ...messages.map((msg: any) => ({
+          role: msg.role,
+          parts: [{ text: msg.content }],
+        })),
       ],
       generationConfig: {
         maxOutputTokens: 8000,
@@ -87,6 +116,7 @@ app.post("/chat", async (req, res) => {
       response: result.response.text(),
     });
   } catch (error) {
+    console.error("Chat error:", error);
     res.status(500).json({ message: "Error processing request" });
   }
 });
