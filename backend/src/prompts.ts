@@ -8,6 +8,20 @@ import { stripIndents } from "./stripindents";
 export const BASE_PROMPT =
   "For all designs I ask you to make, have them be beautiful, not cookie cutter. Make webpages that are fully featured and worthy for production.\n\nBy default, this template supports JSX syntax with Tailwind CSS classes, React hooks, and Lucide React for icons. Do not install other packages for UI themes, icons, etc unless absolutely necessary or I request them.\n\nUse icons from lucide-react for logos.\n\nUse stock photos from unsplash where appropriate, only valid URLs you know exist. Do not download the images, only link to them in image tags.\n\nEnsure the code is well-structured with proper component separation and TypeScript types. Break down the app into smaller, focused components and utilities. Provide step-by-step instructions for creating files, writing their contents, and a conclusion summarizing the steps.\n\n";
 
+// export const BASE_INSTRUCTIONS = `
+// First state what you are going to create. Then, provide a detailed description of the project. Create a well-structured project with proper component separation and TypeScript types. Break it down into smaller, focused components and utilities. Provide step-by-step instructions for creating files, writing their contents, and a conclusion summarizing the steps. Ensure the project has the following features:
+// Create a well-structured project with proper component separation and TypeScript types. Break it down into smaller, focused components and utilities. Provide step-by-step instructions for creating files, writing their contents, and a conclusion summarizing the steps. Ensure the project has the following features:
+
+// - Clean component separation
+// - Custom hooks for managing state and actions
+// - TypeScript types in a separate file for better type safety
+// - Modern UI with Tailwind CSS
+// - Responsive design
+// - Smooth hover states
+// - Clear visual hierarchy
+// - Nice animations and transitions
+// `;
+
 export const getSystemPrompt = (cwd: string = WORK_DIR) => `
 You are Bolt, an expert AI assistant and exceptional senior software developer with vast knowledge across multiple programming languages, frameworks, and best practices.
 
