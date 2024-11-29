@@ -17,8 +17,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const userPrompt = `
+First state what you are going to create. Then, provide a detailed description of the project. Create a well-structured project with proper component separation and TypeScript types. Break it down into smaller, focused components and utilities. Provide step-by-step instructions for creating files, writing their contents, and a conclusion summarizing the steps. Ensure the project has the following features:
+
+- Clean component separation
+- Custom hooks for managing state and actions
+- TypeScript types in a separate file for better type safety
+- Modern UI with Tailwind CSS
+- Responsive design
+- Smooth hover states
+- Clear visual hierarchy
+- Nice animations and transitions
+`;
+
 app.post("/template", async (req, res) => {
-  const prompt = req.body.prompt;
+  // console.log("Received /template request:", req.body); // Log the incoming request body
+  const prompt = req.body.prompt || userPrompt;
   const model = genAI.getGenerativeModel({
     model: "gemini-1.5-flash",
     systemInstruction: getSystemPrompt(),
@@ -51,7 +65,7 @@ app.post("/template", async (req, res) => {
             role: "user",
             parts: [
               {
-                text: `${getSystemPrompt()}\n\nCreate a complete Node.js project template for the following request:\n${prompt}\n\nInclude proper project structure, necessary files, and implementation details.`,
+                text: `${getSystemPrompt()}\n\nCreate a complete Node.js project template for the following request:\n${prompt}\n\nInclude proper project structure, necessary files, and implementation details.\n\n${userPrompt}`,
               },
             ],
           },
@@ -75,8 +89,7 @@ app.post("/template", async (req, res) => {
       res.json({
         prompts: [
           BASE_PROMPT,
-          // BASE_INSTRUCTIONS,
-          `Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${reactBasePrompt}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n`,
+          `Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${reactBasePrompt}\n\n${userPrompt}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n`,
         ],
         uiPrompts: [reactBasePrompt],
       });
@@ -113,8 +126,11 @@ app.post("/chat", async (req, res) => {
       },
     });
 
+    const responseText = result.response.text();
+    console.log("Chat response:", responseText); // Log the response
+
     res.json({
-      response: result.response.text(),
+      response: responseText,
     });
   } catch (error) {
     console.error("Chat error:", error);
