@@ -1,1 +1,13 @@
-{"root":["./src/constants.ts","./src/index.ts","./src/prompts.ts","./src/stripindents.ts"],"version":"5.7.2"}
+{
+  "root": [
+    "./src/constants.ts",
+    "./src/index.ts",
+    "./src/prompts.ts",
+    "./src/stripindents.ts",
+    "./src/defaults/node.ts",
+    "./src/defaults/react.ts",
+    "./src/trash/main.ts",
+    "./src/trash/pain.ts"
+  ],
+  "version": "5.7.2"
+}
